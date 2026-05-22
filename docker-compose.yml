@@ -3,13 +3,22 @@ services:
     image: ghcr.io/username/repository:latest
     container_name: markdown-share
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
       NODE_ENV: production
       PORT: 3000
-    volumes:
-      - markdown-share-data:/app/data
+    networks:
+      - traefik_proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.markdown-share.rule=Host(`<your-url>`)"
+      - "traefik.http.routers.markdown-share.entrypoints=websecure"
+      - "traefik.http.routers.markdown-share.tls.certresolver=letsencrypt"
+      - "traefik.http.services.markdown-share.loadbalancer.server.port=3000"
+      - "traefik.docker.network=traefik_proxy"
+
+networks:
+  traefik_proxy:
+    external: true
 
 volumes:
   markdown-share-data:
