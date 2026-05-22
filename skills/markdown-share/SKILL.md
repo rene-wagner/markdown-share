@@ -1,25 +1,69 @@
 ---
 name: markdown-share
-description: Use when the user wants to store, share, retrieve, or display Markdown through the local Markdown Share Server. Provides HTTP curl workflows for creating Markdown files, reading raw Markdown by UUID, and opening rendered HTML pages.
+description: Use when the user wants to store, share, retrieve, or display Markdown through the Markdown Share Server. Provides HTTP curl workflows for creating Markdown files, reading raw Markdown by UUID, and opening rendered HTML pages. The server base URL is configurable by the user.
 ---
 
 # Markdown Share Skill
 
-Use this skill when the user wants to store, share, retrieve, or display Markdown via the local Markdown Share Server.
+Use this skill when the user wants to store, share, retrieve, or display Markdown via the Markdown Share Server.
 
-## Server
+## Base URL
 
-The server runs by default at:
+The Markdown Share Server base URL is configurable.
+
+Default base URL:
 
 ```txt
 http://localhost:3000
 ```
 
-If the server is not running, start it from the project directory with:
+Use the base URL in this order:
+
+1. A base URL explicitly provided by the user in the current request.
+2. A base URL previously established by the user in the current conversation.
+3. The default base URL: `http://localhost:3000`.
+
+Refer to the selected base URL as:
+
+```txt
+<BASE_URL>
+```
+
+Examples of valid base URLs:
+
+```txt
+http://localhost:3000
+http://localhost:8080
+https://example.com
+https://markdown.example.org
+```
+
+If the user provides a base URL, use it for all Markdown Share operations in the current task.
+
+Examples of user-provided base URL instructions:
+
+- "Use https://example.com as the Markdown Share server."
+- "My markdown server is at https://md.example.org."
+- "Set the Markdown Share base URL to http://localhost:8080."
+- "Use https://example.com for this upload."
+
+Do not ask for a server URL unless the task cannot be completed with the default.
+
+## Server
+
+The server default is:
+
+```txt
+http://localhost:3000
+```
+
+If the selected server is local and is not running, start it from the project directory with:
 
 ```bash
 npm run dev
 ```
+
+If the selected server is remote, do not suggest `npm run dev`. Instead, report that the remote request failed and include the URL that was attempted.
 
 ## Store Markdown
 
@@ -34,7 +78,7 @@ POST /markdown
 Example with `text/markdown`:
 
 ```bash
-curl -s -X POST http://localhost:3000/markdown \
+curl -s -X POST <BASE_URL>/markdown \
   -H 'content-type: text/markdown' \
   --data-binary '# Title
 
@@ -44,7 +88,7 @@ Markdown content...'
 Example with JSON:
 
 ```bash
-curl -s -X POST http://localhost:3000/markdown \
+curl -s -X POST <BASE_URL>/markdown \
   -H 'content-type: application/json' \
   -d '{"markdown":"# Title\n\nMarkdown content..."}'
 ```
@@ -63,8 +107,10 @@ The response contains:
 After storing Markdown successfully, report at least these values to the user:
 
 - `id`
-- Raw URL: `http://localhost:3000/<id>/raw`
-- HTML URL: `http://localhost:3000/<id>`
+- Raw URL: `<BASE_URL>/<id>/raw`
+- HTML URL: `<BASE_URL>/<id>`
+
+When reporting the URLs, replace `<BASE_URL>` with the selected base URL.
 
 ## Read Raw Markdown
 
@@ -79,7 +125,7 @@ GET /:id/raw
 Example:
 
 ```bash
-curl -s http://localhost:3000/<UUID>/raw
+curl -s <BASE_URL>/<UUID>/raw
 ```
 
 ## Display Markdown as HTML
@@ -95,7 +141,7 @@ GET /:id
 Example URL:
 
 ```txt
-http://localhost:3000/<UUID>
+<BASE_URL>/<UUID>
 ```
 
 ## MCP Note
@@ -103,7 +149,7 @@ http://localhost:3000/<UUID>
 The server also exposes an MCP Streamable HTTP endpoint at:
 
 ```txt
-http://localhost:3000/mcp
+<BASE_URL>/mcp
 ```
 
 Agents may either use the HTTP API described above or connect through the MCP endpoint if they support MCP Streamable HTTP.
@@ -112,6 +158,13 @@ Agents may either use the HTTP API described above or connect through the MCP en
 
 - Do not store Markdown unless the user explicitly requests it.
 - If the Markdown content is empty, ask for clarification before storing it.
+- Determine the base URL in this order:
+  1. A base URL explicitly provided by the user in the current request.
+  2. A base URL previously established by the user in the current conversation.
+  3. The default base URL: `http://localhost:3000`.
 - Use `/:id/raw` for further processing.
 - Use `/:id` for humans and browser views.
-- If a request fails, first check whether the server is running.
+- If a request fails, first check whether the selected server is local or remote.
+- If the selected server is local and is not running, suggest starting it with `npm run dev` from the project directory.
+- If the selected server is remote, do not suggest `npm run dev`; report that the remote request failed and include the URL that was attempted.
+- Do not claim that a user-provided base URL is remembered beyond the current conversation unless a persistent configuration mechanism is available.
