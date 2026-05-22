@@ -1,0 +1,30 @@
+{
+  "name": "markdown-share",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@cfworker/json-schema": "^4.1.1",
+    "@hono/node-server": "^2.0.3",
+    "@modelcontextprotocol/server": "^2.0.0-alpha.2",
+    "hono": "^4.12.21",
+    "markdown-it": "^14.1.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^25.9.1",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3"
+  },
+  "pi": {
+    "skills": [
+      "./skills/markdown-share/SKILL.md"
+    ]
+  }
+}
