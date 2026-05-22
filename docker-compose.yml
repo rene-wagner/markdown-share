@@ -1,0 +1,15 @@
+services:
+  markdown-share:
+    image: ghcr.io/username/repository:latest
+    container_name: markdown-share
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    volumes:
+      - markdown-share-data:/app/data
+
+volumes:
+  markdown-share-data:
