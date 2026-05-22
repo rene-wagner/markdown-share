@@ -8,10 +8,10 @@ export async function createMcpTransport() {
   mcpServer.registerTool(
     'create_markdown',
     {
-      title: 'Markdown anlegen',
-      description: 'Speichert eine neue Markdown-Datei und gibt UUID sowie Abruf-URLs zurück.',
+      title: 'Create Markdown',
+      description: 'Stores a new Markdown file and returns the UUID and retrieval URLs.',
       inputSchema: z.object({
-        markdown: z.string().describe('Der zu speichernde Markdown-Inhalt'),
+        markdown: z.string().describe('The Markdown content to store'),
       }),
       outputSchema: z.object({
         id: z.string(),
@@ -33,10 +33,10 @@ export async function createMcpTransport() {
   mcpServer.registerTool(
     'read_markdown',
     {
-      title: 'Markdown lesen',
-      description: 'Liest eine gespeicherte Markdown-Datei anhand ihrer UUID.',
+      title: 'Read Markdown',
+      description: 'Reads a stored Markdown file by its UUID.',
       inputSchema: z.object({
-        id: z.string().uuid().describe('UUID der Markdown-Datei'),
+        id: z.string().uuid().describe('UUID of the Markdown file'),
       }),
       outputSchema: z.object({
         id: z.string(),
@@ -67,7 +67,7 @@ export async function createMcpTransport() {
       }),
     }),
     {
-      title: 'Gespeicherte Markdown-Dateien',
+      title: 'Stored Markdown files',
       mimeType: 'text/markdown',
     },
     async (uri, { id }) => ({

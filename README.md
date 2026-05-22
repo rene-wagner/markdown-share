@@ -1,6 +1,6 @@
 # Markdown Share Server
 
-Kleine Hono-App zum Speichern und Anzeigen von Markdown.
+A small Hono app for storing and displaying Markdown.
 
 ## Start
 
@@ -9,27 +9,27 @@ npm install
 npm run dev
 ```
 
-Der Server läuft standardmäßig auf `http://localhost:3000`.
+The server runs at `http://localhost:3000` by default.
 
-## Markdown speichern
+## Store Markdown
 
-Als `text/markdown` oder Plain Text:
+As `text/markdown` or plain text:
 
 ```bash
 curl -X POST http://localhost:3000/markdown \
   -H 'content-type: text/markdown' \
-  --data-binary '# Hallo Welt'
+  --data-binary '# Hello World'
 ```
 
-Oder als JSON:
+Or as JSON:
 
 ```bash
 curl -X POST http://localhost:3000/markdown \
   -H 'content-type: application/json' \
-  -d '{"markdown":"# Hallo Welt"}'
+  -d '{"markdown":"# Hello World"}'
 ```
 
-Antwort:
+Response:
 
 ```json
 {
@@ -40,23 +40,23 @@ Antwort:
 }
 ```
 
-## Markdown abrufen
+## Retrieve Markdown
 
 - Raw Markdown: `GET /:id/raw`
-- Gerenderte HTML-Seite mit Tailwind Typography: `GET /:id`
+- Rendered HTML page with Tailwind Typography: `GET /:id`
 
-Gespeichert wird im lokalen Verzeichnis `data/`.
+Files are stored in the local `data/` directory.
 
-## MCP Endpoint für Agents
+## MCP Endpoint for Agents
 
-Die App stellt zusätzlich einen Streamable-HTTP-MCP-Endpoint bereit:
+The app also provides a Streamable HTTP MCP endpoint:
 
-- MCP Endpoint: `POST/GET/DELETE /mcp`
-- Tool `create_markdown`: legt neues Markdown an
-- Tool `read_markdown`: liest bestehendes Markdown anhand der UUID
-- Resource Template `markdown://{id}`: gespeicherte Markdown-Dateien als MCP Resources
+- MCP endpoint: `POST/GET/DELETE /mcp`
+- Tool `create_markdown`: creates new Markdown
+- Tool `read_markdown`: reads existing Markdown by UUID
+- Resource template `markdown://{id}`: stored Markdown files as MCP resources
 
-Beispiel Tool-Call nach MCP-Initialisierung:
+Example tool call after MCP initialization:
 
 ```json
 {
@@ -66,7 +66,7 @@ Beispiel Tool-Call nach MCP-Initialisierung:
   "params": {
     "name": "create_markdown",
     "arguments": {
-      "markdown": "# Hallo Agent"
+      "markdown": "# Hello Agent"
     }
   }
 }

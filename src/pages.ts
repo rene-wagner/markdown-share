@@ -4,7 +4,7 @@ const md = new MarkdownIt({ html: false, linkify: true, typographer: true })
 
 export function renderHomePage() {
   return `<!doctype html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -14,10 +14,10 @@ export function renderHomePage() {
   <body class="bg-slate-50 text-slate-950">
     <main class="mx-auto max-w-2xl px-6 py-10">
       <h1 class="text-3xl font-bold">Markdown Share Server</h1>
-      <p class="mt-4 text-slate-700">Markdown per POST speichern:</p>
+      <p class="mt-4 text-slate-700">Save Markdown via POST:</p>
       <pre class="mt-4 overflow-x-auto rounded bg-slate-900 p-4 text-sm text-slate-100">curl -X POST http://localhost:3000/markdown \\
   -H 'content-type: text/markdown' \\
-  --data-binary '# Hallo Welt'</pre>
+  --data-binary '# Hello World'</pre>
     </main>
   </body>
 </html>`
@@ -27,7 +27,7 @@ export function renderMarkdownPage(id: string, markdown: string) {
   const html = md.render(markdown)
 
   return `<!doctype html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

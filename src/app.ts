@@ -38,7 +38,7 @@ export function createApp(mcpTransport: McpHttpTransport) {
     }
 
     console.error(err)
-    return c.json({ error: 'Interner Serverfehler' }, 500)
+    return c.json({ error: 'Internal server error' }, 500)
   })
 
   return app

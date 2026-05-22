@@ -7,7 +7,7 @@ export async function getMarkdownBody(c: Context) {
   if (contentType.includes('application/json')) {
     const body = await c.req.json<{ markdown?: unknown }>()
     if (typeof body.markdown !== 'string') {
-      throw new HTTPException(400, { message: 'JSON muss ein Feld "markdown" enthalten' })
+      throw new HTTPException(400, { message: 'JSON must contain a "markdown" field' })
     }
 
     return body.markdown

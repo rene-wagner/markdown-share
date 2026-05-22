@@ -7,5 +7,5 @@ const app = createApp(mcpTransport)
 
 const port = Number(process.env.PORT ?? 3000)
 serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`Server läuft auf http://localhost:${info.port}`)
+  console.log(`Server running at http://localhost:${info.port}`)
 })
