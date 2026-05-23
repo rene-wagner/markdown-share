@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { HTTPException } from 'hono/http-exception'
 
@@ -43,12 +43,25 @@ export async function readMarkdown(id: string) {
   }
 }
 
+export async function deleteMarkdown(id: string) {
+  try {
+    await unlink(fileFor(id))
+  } catch (error) {
+    if (error instanceof HTTPException) {
+      throw error
+    }
+
+    throw new HTTPException(404, { message: 'Markdown not found' })
+  }
+}
+
 export async function listMarkdownIds() {
   try {
     const files = await readdir(storageDir)
     return files
       .filter((file) => /^[0-9a-f-]{36}\.md$/i.test(file))
       .map((file) => file.slice(0, -3))
+      .sort((a, b) => a.localeCompare(b))
   } catch {
     return []
   }

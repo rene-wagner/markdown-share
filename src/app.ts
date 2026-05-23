@@ -6,12 +6,13 @@ import {
   renderAccountPage,
   renderHomePage,
   renderLoginPage,
+  renderMarkdownListPage,
   renderMarkdownPage,
   renderStatusPage,
 } from './pages.js'
 import { getLoginBody, getMarkdownBody, getPasswordChangeBody } from './request.js'
 import { createSession, deleteSession, getSession } from './sessions.js'
-import { readMarkdown, saveMarkdown } from './storage.js'
+import { deleteMarkdown, listMarkdownIds, readMarkdown, saveMarkdown } from './storage.js'
 import {
   getUser,
   hasDefaultPassword,
@@ -266,6 +267,41 @@ export function createApp(mcpTransport: McpHttpTransport) {
     )
   })
 
+  app.get('/markdown', async (c) => {
+    const user = await getAuthenticatedUser(c)
+    if (!user) {
+      if (wantsHtml(c)) {
+        return redirectToLogin(c, 'Please sign in to open the markdown overview.')
+      }
+
+      c.header('WWW-Authenticate', 'Bearer realm="markdown-share"')
+      throw new HTTPException(401, {
+        message: 'Authentication required. Use a session cookie or Authorization: Bearer <api-key>.',
+      })
+    }
+
+    const ids = await listMarkdownIds()
+    if (!wantsHtml(c)) {
+      return c.json(
+        {
+          markdown: ids.map((id) => ({
+            id,
+            rawUrl: `/${id}/raw`,
+            htmlUrl: `/${id}`,
+          })),
+        },
+        200,
+      )
+    }
+
+    return c.html(
+      renderMarkdownListPage({
+        ids,
+        notice: c.req.query('notice'),
+      }),
+    )
+  })
+
   app.post('/markdown', async (c) => {
     const user = await getAuthenticatedUser(c)
     if (!user) {
@@ -277,6 +313,29 @@ export function createApp(mcpTransport: McpHttpTransport) {
 
     const result = await saveMarkdown(await getMarkdownBody(c))
     return c.json(result, 201)
+  })
+
+  app.post('/markdown/:id/delete', async (c) => {
+    const user = await getAuthenticatedUser(c)
+    if (!user) {
+      if (wantsHtml(c)) {
+        return redirectToLogin(c, 'Please sign in to delete stored Markdown.')
+      }
+
+      c.header('WWW-Authenticate', 'Bearer realm="markdown-share"')
+      throw new HTTPException(401, {
+        message: 'Authentication required. Use a session cookie or Authorization: Bearer <api-key>.',
+      })
+    }
+
+    const id = c.req.param('id')
+    await deleteMarkdown(id)
+
+    if (wantsHtml(c)) {
+      return c.redirect(`/markdown?notice=${encodeURIComponent('Markdown deleted successfully.')}`, 303)
+    }
+
+    return c.json({ ok: true, id }, 200)
   })
 
   app.get('/:id/raw', async (c) => {

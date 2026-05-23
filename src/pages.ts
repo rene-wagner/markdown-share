@@ -2,6 +2,18 @@ import MarkdownIt from 'markdown-it'
 
 const md = new MarkdownIt({ html: false, linkify: true, typographer: true })
 
+function markdownHref(id: string) {
+  return `/${encodeURIComponent(id)}`
+}
+
+function rawMarkdownHref(id: string) {
+  return `/${encodeURIComponent(id)}/raw`
+}
+
+function deleteMarkdownHref(id: string) {
+  return `/markdown/${encodeURIComponent(id)}/delete`
+}
+
 function escapeHtml(text: string) {
   return text
     .replaceAll('&', '&amp;')
@@ -135,6 +147,11 @@ interface AccountPageOptions {
   success?: string
 }
 
+interface MarkdownListPageOptions {
+  ids: string[]
+  notice?: string
+}
+
 export function renderAccountPage({ username, passwordWarning, hasApiKey, apiKey, error, success }: AccountPageOptions) {
   return renderLayout(
     'Account',
@@ -192,6 +209,15 @@ export function renderAccountPage({ username, passwordWarning, hasApiKey, apiKey
         </section>
       </div>
       <section class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-semibold">Stored markdown</h2>
+            <p class="mt-2 text-sm text-slate-700">Open an overview of all stored markdown documents, then view or delete them.</p>
+          </div>
+          <a class="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700" href="/markdown">Open overview</a>
+        </div>
+      </section>
+      <section class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
         <h2 class="text-xl font-semibold">Examples</h2>
         <div class="mt-6 grid gap-6 lg:grid-cols-2">
           <div>
@@ -208,6 +234,53 @@ export function renderAccountPage({ username, passwordWarning, hasApiKey, apiKey
           </div>
         </div>
       </section>
+    </div>`,
+  )
+}
+
+export function renderMarkdownListPage({ ids, notice }: MarkdownListPageOptions) {
+  const items =
+    ids.length === 0
+      ? `<p class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-600">No markdown files have been stored yet.</p>`
+      : `<div class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
+          <ul class="divide-y divide-slate-200">
+            ${ids
+              .map((id) => {
+                const escapedId = escapeHtml(id)
+                return `<li class="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p class="text-sm font-medium text-slate-900">Markdown</p>
+                    <code class="mt-2 block break-all rounded bg-slate-100 px-3 py-2 text-sm text-slate-800">${escapedId}</code>
+                  </div>
+                  <div class="flex flex-wrap gap-3">
+                    <a class="rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="${escapeHtml(markdownHref(id))}">View</a>
+                    <a class="rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="${escapeHtml(rawMarkdownHref(id))}">Raw</a>
+                    <form method="post" action="${escapeHtml(deleteMarkdownHref(id))}" onsubmit="return confirm('Delete this markdown file?')">
+                      <button class="rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-500" type="submit">Delete</button>
+                    </form>
+                  </div>
+                </li>`
+              })
+              .join('')}
+          </ul>
+        </div>`
+
+  return renderLayout(
+    'Markdown overview',
+    `<div class="space-y-6">
+      <nav class="flex items-center justify-between text-sm text-slate-600">
+        <div class="flex items-center gap-4">
+          <a class="font-medium hover:text-slate-950" href="/">Markdown Share</a>
+          <a class="hover:text-slate-950" href="/account">Account</a>
+        </div>
+        <span>${ids.length} file${ids.length === 1 ? '' : 's'}</span>
+      </nav>
+      <section class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
+        <h1 class="text-2xl font-bold">Markdown overview</h1>
+        <p class="mt-3 text-slate-700">Here you can open stored markdown files as rendered HTML or raw Markdown, and delete files you no longer need.</p>
+        ${notice ? renderAlert('success', notice) : ''}
+      </section>
+      ${items}
     </div>`,
   )
 }
@@ -244,12 +317,18 @@ export function renderMarkdownPage(id: string, markdown: string) {
 
   return renderLayout(
     `Markdown ${id}`,
-    `<nav class="mb-8 flex items-center justify-between text-sm text-slate-600">
+    `<nav class="mb-8 flex items-center justify-between gap-4 text-sm text-slate-600">
       <div class="flex items-center gap-4">
         <a class="font-medium hover:text-slate-950" href="/">Markdown Share</a>
         <a class="hover:text-slate-950" href="/account">Account</a>
+        <a class="hover:text-slate-950" href="/markdown">Overview</a>
       </div>
-      <a class="rounded bg-slate-900 px-3 py-1.5 text-white hover:bg-slate-700" href="/${id}/raw">Raw</a>
+      <div class="flex flex-wrap gap-3">
+        <a class="rounded border border-slate-300 px-3 py-1.5 text-slate-700 hover:bg-slate-100" href="${escapeHtml(rawMarkdownHref(id))}">Raw</a>
+        <form method="post" action="${escapeHtml(deleteMarkdownHref(id))}" onsubmit="return confirm('Delete this markdown file?')">
+          <button class="rounded bg-red-600 px-3 py-1.5 text-white hover:bg-red-500" type="submit">Delete</button>
+        </form>
+      </div>
     </nav>
     <article class="prose prose-slate max-w-none rounded-xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
       ${html}
