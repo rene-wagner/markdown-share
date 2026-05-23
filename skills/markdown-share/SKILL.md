@@ -1,6 +1,6 @@
 ---
 name: markdown-share
-description: Use when the user wants to store, share, retrieve, or display Markdown through the Markdown Share Server. Provides HTTP curl workflows for creating Markdown files, reading raw Markdown by UUID, and opening rendered HTML pages. The server base URL is configurable by the user.
+description: Use when the user wants to store, share, retrieve, or display Markdown through the Markdown Share Server. Provides authenticated HTTP curl workflows for creating Markdown files, reading raw Markdown by UUID, and opening rendered HTML pages. The server base URL is configurable.
 ---
 
 # Markdown Share Skill
@@ -49,6 +49,25 @@ Examples of user-provided base URL instructions:
 
 Do not ask for a server URL unless the task cannot be completed with the default.
 
+## Authentication
+
+Markdown Share now requires authentication for all Markdown and MCP operations.
+
+Supported auth methods:
+
+1. Browser session cookie obtained from logging in on `<BASE_URL>/login`
+2. API key sent as:
+
+```txt
+Authorization: Bearer <API_KEY>
+```
+
+For agent workflows, prefer the API key.
+
+If the user asks you to store or read Markdown through HTTP or MCP and no API key or authenticated browser/session context is available, ask for an API key before proceeding.
+
+Do not assume the default admin password is still valid. The admin is expected to change it.
+
 ## Server
 
 The server default is:
@@ -79,6 +98,7 @@ Example with `text/markdown`:
 
 ```bash
 curl -s -X POST <BASE_URL>/markdown \
+  -H 'authorization: Bearer <API_KEY>' \
   -H 'content-type: text/markdown' \
   --data-binary '# Title
 
@@ -89,6 +109,7 @@ Example with JSON:
 
 ```bash
 curl -s -X POST <BASE_URL>/markdown \
+  -H 'authorization: Bearer <API_KEY>' \
   -H 'content-type: application/json' \
   -d '{"markdown":"# Title\n\nMarkdown content..."}'
 ```
@@ -125,12 +146,13 @@ GET /:id/raw
 Example:
 
 ```bash
-curl -s <BASE_URL>/<UUID>/raw
+curl -s <BASE_URL>/<UUID>/raw \
+  -H 'authorization: Bearer <API_KEY>'
 ```
 
 ## Display Markdown as HTML
 
-Use the HTML route when the user wants a formatted browser view or a shareable rendered page.
+Use the HTML route when the user wants a formatted browser view.
 
 Route:
 
@@ -144,6 +166,8 @@ Example URL:
 <BASE_URL>/<UUID>
 ```
 
+The browser must already be logged in for the HTML route, otherwise the user will be redirected to the login page.
+
 ## MCP Note
 
 The server also exposes an MCP Streamable HTTP endpoint at:
@@ -152,7 +176,13 @@ The server also exposes an MCP Streamable HTTP endpoint at:
 <BASE_URL>/mcp
 ```
 
-Agents may either use the HTTP API described above or connect through the MCP endpoint if they support MCP Streamable HTTP.
+MCP requests require:
+
+```txt
+Authorization: Bearer <API_KEY>
+```
+
+Agents may either use the authenticated HTTP API described above or connect through the MCP endpoint if they support MCP Streamable HTTP.
 
 ## Rules
 
@@ -164,6 +194,7 @@ Agents may either use the HTTP API described above or connect through the MCP en
   3. The default base URL: `http://localhost:3000`.
 - Use `/:id/raw` for further processing.
 - Use `/:id` for humans and browser views.
+- If an authenticated request is required and no API key is available, ask the user for one.
 - If a request fails, first check whether the selected server is local or remote.
 - If the selected server is local and is not running, suggest starting it with `npm run dev` from the project directory.
 - If the selected server is remote, do not suggest `npm run dev`; report that the remote request failed and include the URL that was attempted.

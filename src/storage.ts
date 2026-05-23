@@ -34,7 +34,11 @@ export async function saveMarkdown(markdown: string) {
 export async function readMarkdown(id: string) {
   try {
     return await readFile(fileFor(id), 'utf8')
-  } catch {
+  } catch (error) {
+    if (error instanceof HTTPException) {
+      throw error
+    }
+
     throw new HTTPException(404, { message: 'Markdown not found' })
   }
 }
