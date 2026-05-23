@@ -17,17 +17,26 @@ Default base URL:
 http://localhost:3000
 ```
 
+The user may define the base URL as an environment variable before running commands:
+
+```bash
+export MARKDOWN_SHARE_BASE_URL='http://localhost:3000'
+```
+
 Use the base URL in this order:
 
 1. A base URL explicitly provided by the user in the current request.
-2. A base URL previously established by the user in the current conversation.
-3. The default base URL: `http://localhost:3000`.
+2. The `MARKDOWN_SHARE_BASE_URL` environment variable, if it is set.
+3. A base URL previously established by the user in the current conversation.
+4. The default base URL: `http://localhost:3000`.
 
 Refer to the selected base URL as:
 
 ```txt
-<BASE_URL>
+$MARKDOWN_SHARE_BASE_URL
 ```
+
+If the environment variable is not set, substitute the selected URL directly in commands.
 
 Examples of valid base URLs:
 
@@ -55,11 +64,17 @@ Markdown Share now requires authentication for all Markdown and MCP operations.
 
 Supported auth methods:
 
-1. Browser session cookie obtained from logging in on `<BASE_URL>/login`
+1. Browser session cookie obtained from logging in on `$MARKDOWN_SHARE_BASE_URL/login`
 2. API key sent as:
 
 ```txt
-Authorization: Bearer <API_KEY>
+Authorization: Bearer $MARKDOWN_SHARE_API_KEY
+```
+
+The user may define the API key as an environment variable before running commands:
+
+```bash
+export MARKDOWN_SHARE_API_KEY='<api-key>'
 ```
 
 For agent workflows, prefer the API key.
@@ -97,8 +112,8 @@ POST /markdown
 Example with `text/markdown`:
 
 ```bash
-curl -s -X POST <BASE_URL>/markdown \
-  -H 'authorization: Bearer <API_KEY>' \
+curl -s -X POST "$MARKDOWN_SHARE_BASE_URL/markdown" \
+  -H "authorization: Bearer $MARKDOWN_SHARE_API_KEY" \
   -H 'content-type: text/markdown' \
   --data-binary '# Title
 
@@ -108,8 +123,8 @@ Markdown content...'
 Example with JSON:
 
 ```bash
-curl -s -X POST <BASE_URL>/markdown \
-  -H 'authorization: Bearer <API_KEY>' \
+curl -s -X POST "$MARKDOWN_SHARE_BASE_URL/markdown" \
+  -H "authorization: Bearer $MARKDOWN_SHARE_API_KEY" \
   -H 'content-type: application/json' \
   -d '{"markdown":"# Title\n\nMarkdown content..."}'
 ```
@@ -128,10 +143,10 @@ The response contains:
 After storing Markdown successfully, report at least these values to the user:
 
 - `id`
-- Raw URL: `<BASE_URL>/<id>/raw`
-- HTML URL: `<BASE_URL>/<id>`
+- Raw URL: `$MARKDOWN_SHARE_BASE_URL/<id>/raw`
+- HTML URL: `$MARKDOWN_SHARE_BASE_URL/<id>`
 
-When reporting the URLs, replace `<BASE_URL>` with the selected base URL.
+When reporting the URLs, replace `$MARKDOWN_SHARE_BASE_URL` with the selected base URL.
 
 ## Read Raw Markdown
 
@@ -146,8 +161,8 @@ GET /:id/raw
 Example:
 
 ```bash
-curl -s <BASE_URL>/<UUID>/raw \
-  -H 'authorization: Bearer <API_KEY>'
+curl -s "$MARKDOWN_SHARE_BASE_URL/<UUID>/raw" \
+  -H "authorization: Bearer $MARKDOWN_SHARE_API_KEY"
 ```
 
 ## Display Markdown as HTML
@@ -163,7 +178,7 @@ GET /:id
 Example URL:
 
 ```txt
-<BASE_URL>/<UUID>
+$MARKDOWN_SHARE_BASE_URL/<UUID>
 ```
 
 The browser must already be logged in for the HTML route, otherwise the user will be redirected to the login page.
@@ -173,13 +188,13 @@ The browser must already be logged in for the HTML route, otherwise the user wil
 The server also exposes an MCP Streamable HTTP endpoint at:
 
 ```txt
-<BASE_URL>/mcp
+$MARKDOWN_SHARE_BASE_URL/mcp
 ```
 
 MCP requests require:
 
 ```txt
-Authorization: Bearer <API_KEY>
+Authorization: Bearer $MARKDOWN_SHARE_API_KEY
 ```
 
 Agents may either use the authenticated HTTP API described above or connect through the MCP endpoint if they support MCP Streamable HTTP.
@@ -190,11 +205,12 @@ Agents may either use the authenticated HTTP API described above or connect thro
 - If the Markdown content is empty, ask for clarification before storing it.
 - Determine the base URL in this order:
   1. A base URL explicitly provided by the user in the current request.
-  2. A base URL previously established by the user in the current conversation.
-  3. The default base URL: `http://localhost:3000`.
+  2. The `MARKDOWN_SHARE_BASE_URL` environment variable, if it is set.
+  3. A base URL previously established by the user in the current conversation.
+  4. The default base URL: `http://localhost:3000`.
 - Use `/:id/raw` for further processing.
 - Use `/:id` for humans and browser views.
-- If an authenticated request is required and no API key is available, ask the user for one.
+- If an authenticated request is required and no API key is available through `MARKDOWN_SHARE_API_KEY` or another authenticated context, ask the user for one.
 - If a request fails, first check whether the selected server is local or remote.
 - If the selected server is local and is not running, suggest starting it with `npm run dev` from the project directory.
 - If the selected server is remote, do not suggest `npm run dev`; report that the remote request failed and include the URL that was attempted.
