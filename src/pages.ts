@@ -45,6 +45,10 @@ function renderLayout(title: string, content: string) {
     <title>${escapeHtml(title)}</title>
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <style>
+      .prose {
+        overflow-wrap: anywhere;
+      }
+
       .prose pre {
         max-width: 100%;
         overflow-x: auto;
