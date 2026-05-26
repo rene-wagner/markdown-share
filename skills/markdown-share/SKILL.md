@@ -137,6 +137,7 @@ The response contains:
 {
   "id": "...uuid...",
   "title": "Short descriptive title",
+  "createdAt": "2026-05-26T12:00:00.000Z",
   "rawUrl": "/...uuid.../raw",
   "htmlUrl": "/...uuid...",
   "resourceUri": "markdown://...uuid..."
@@ -147,6 +148,7 @@ After storing Markdown successfully, report at least these values to the user:
 
 - `id`
 - `title`
+- `createdAt`
 - Raw URL: `$MARKDOWN_SHARE_BASE_URL/<id>/raw`
 - HTML URL: `$MARKDOWN_SHARE_BASE_URL/<id>`
 

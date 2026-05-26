@@ -9,6 +9,7 @@ const maxTitleLength = 120
 export interface MarkdownEntry {
   id: string
   title: string
+  createdAt?: string
   rawUrl: string
   htmlUrl: string
   resourceUri: string
@@ -66,10 +67,11 @@ function deriveTitle(markdown: string, id: string) {
   return `Markdown ${id}`
 }
 
-function markdownEntry(id: string, title: string): MarkdownEntry {
+function markdownEntry(id: string, title: string, createdAt?: string): MarkdownEntry {
   return {
     id,
     title,
+    createdAt,
     rawUrl: `/${id}/raw`,
     htmlUrl: `/${id}`,
     resourceUri: `markdown://${id}`,
@@ -93,15 +95,12 @@ export async function saveMarkdown({ markdown, title }: SaveMarkdownInput) {
 
   const id = randomUUID()
   const storedTitle = normalizeTitle(title ?? '') || deriveTitle(markdown, id)
+  const createdAt = new Date().toISOString()
 
   await writeFile(fileFor(id), markdown, 'utf8')
-  await writeFile(
-    metadataFileFor(id),
-    JSON.stringify({ title: storedTitle, createdAt: new Date().toISOString() }, null, 2),
-    'utf8',
-  )
+  await writeFile(metadataFileFor(id), JSON.stringify({ title: storedTitle, createdAt }, null, 2), 'utf8')
 
-  return markdownEntry(id, storedTitle)
+  return markdownEntry(id, storedTitle, createdAt)
 }
 
 export async function readMarkdown(id: string) {
@@ -139,7 +138,7 @@ export async function getMarkdownEntry(id: string) {
   const metadata = await readMetadata(id)
   const title = normalizeTitle(metadata?.title ?? '') || deriveTitle(markdown, id)
 
-  return markdownEntry(id, title)
+  return markdownEntry(id, title, metadata?.createdAt)
 }
 
 export async function listMarkdownIds() {

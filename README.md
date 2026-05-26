@@ -89,6 +89,7 @@ Response:
 {
   "id": "...uuid...",
   "title": "Hello World",
+  "createdAt": "2026-05-26T12:00:00.000Z",
   "rawUrl": "/...uuid.../raw",
   "htmlUrl": "/...uuid...",
   "resourceUri": "markdown://...uuid..."

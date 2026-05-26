@@ -24,6 +24,18 @@ function escapeHtml(text: string) {
     .replaceAll("'", '&#39;')
 }
 
+function formatDateTime(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return null
+  }
+
+  return new Intl.DateTimeFormat('de-DE', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(date)
+}
+
 function renderLayout(title: string, content: string) {
   return `<!doctype html>
 <html lang="en">
@@ -248,9 +260,11 @@ export function renderMarkdownListPage({ entries, notice }: MarkdownListPageOpti
             ${entries
               .map((entry) => {
                 const escapedId = escapeHtml(entry.id)
+                const createdAt = entry.createdAt ? formatDateTime(entry.createdAt) : null
                 return `<li class="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p class="text-base font-semibold text-slate-900">${escapeHtml(entry.title)}</p>
+                    ${createdAt ? `<p class="mt-1 text-sm text-slate-500">Created: ${escapeHtml(createdAt)}</p>` : ''}
                     <code class="mt-2 block break-all rounded bg-slate-100 px-3 py-2 text-sm text-slate-800">${escapedId}</code>
                   </div>
                   <div class="flex flex-wrap gap-3">

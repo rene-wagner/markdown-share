@@ -17,6 +17,7 @@ export async function createMcpTransport() {
       outputSchema: z.object({
         id: z.string(),
         title: z.string(),
+        createdAt: z.string().optional(),
         rawUrl: z.string(),
         htmlUrl: z.string(),
         resourceUri: z.string(),
