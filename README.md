@@ -80,7 +80,7 @@ curl -X POST http://localhost:3000/markdown \
 curl -X POST http://localhost:3000/markdown \
   -H 'authorization: Bearer <api-key>' \
   -H 'content-type: application/json' \
-  -d '{"markdown":"# Hello World"}'
+  -d '{"title":"Hello World","markdown":"# Hello World"}'
 ```
 
 Response:
@@ -88,6 +88,7 @@ Response:
 ```json
 {
   "id": "...uuid...",
+  "title": "Hello World",
   "rawUrl": "/...uuid.../raw",
   "htmlUrl": "/...uuid...",
   "resourceUri": "markdown://...uuid..."

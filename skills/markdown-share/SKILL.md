@@ -126,14 +126,17 @@ Example with JSON:
 curl -s -X POST "$MARKDOWN_SHARE_BASE_URL/markdown" \
   -H "authorization: Bearer $MARKDOWN_SHARE_API_KEY" \
   -H 'content-type: application/json' \
-  -d '{"markdown":"# Title\n\nMarkdown content..."}'
+  -d '{"title":"Short descriptive title","markdown":"# Title\n\nMarkdown content..."}'
 ```
+
+When storing Markdown as JSON, generate a concise human-readable title from the content unless the user explicitly provides one. Send it as the optional `title` field.
 
 The response contains:
 
 ```json
 {
   "id": "...uuid...",
+  "title": "Short descriptive title",
   "rawUrl": "/...uuid.../raw",
   "htmlUrl": "/...uuid...",
   "resourceUri": "markdown://...uuid..."
@@ -143,6 +146,7 @@ The response contains:
 After storing Markdown successfully, report at least these values to the user:
 
 - `id`
+- `title`
 - Raw URL: `$MARKDOWN_SHARE_BASE_URL/<id>/raw`
 - HTML URL: `$MARKDOWN_SHARE_BASE_URL/<id>`
 
@@ -203,6 +207,7 @@ Agents may either use the authenticated HTTP API described above or connect thro
 
 - Do not store Markdown unless the user explicitly requests it.
 - If the Markdown content is empty, ask for clarification before storing it.
+- When storing Markdown as JSON, generate a concise human-readable title from the content unless the user explicitly provides one.
 - Determine the base URL in this order:
   1. A base URL explicitly provided by the user in the current request.
   2. The `MARKDOWN_SHARE_BASE_URL` environment variable, if it is set.

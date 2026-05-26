@@ -1,6 +1,6 @@
 import { McpServer, ResourceTemplate, WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/server'
 import { z } from 'zod'
-import { listMarkdownIds, readMarkdown, saveMarkdown } from './storage.js'
+import { listMarkdownEntries, readMarkdown, saveMarkdown } from './storage.js'
 
 export async function createMcpTransport() {
   const mcpServer = new McpServer({ name: 'markdown-share-server', version: '1.0.0' })
@@ -9,23 +9,26 @@ export async function createMcpTransport() {
     'create_markdown',
     {
       title: 'Create Markdown',
-      description: 'Stores a new Markdown file and returns the UUID and retrieval URLs.',
+      description: 'Stores a new Markdown file and returns the UUID, title, and retrieval URLs.',
       inputSchema: z.object({
         markdown: z.string().describe('The Markdown content to store'),
+        title: z.string().optional().describe('A short human-readable title for the Markdown document'),
       }),
       outputSchema: z.object({
         id: z.string(),
+        title: z.string(),
         rawUrl: z.string(),
         htmlUrl: z.string(),
         resourceUri: z.string(),
       }),
     },
-    async ({ markdown }) => {
-      const result = await saveMarkdown(markdown)
+    async ({ markdown, title }) => {
+      const result = await saveMarkdown({ markdown, title })
+      const structuredContent = { ...result }
 
       return {
         content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
-        structuredContent: result,
+        structuredContent,
       }
     },
   )
@@ -58,10 +61,10 @@ export async function createMcpTransport() {
     'markdown',
     new ResourceTemplate('markdown://{id}', {
       list: async () => ({
-        resources: (await listMarkdownIds()).map((id) => ({
-          name: id,
-          uri: `markdown://${id}`,
-          title: `Markdown ${id}`,
+        resources: (await listMarkdownEntries()).map((entry) => ({
+          name: entry.title,
+          uri: entry.resourceUri,
+          title: entry.title,
           mimeType: 'text/markdown',
         })),
       }),

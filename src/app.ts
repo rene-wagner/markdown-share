@@ -12,7 +12,7 @@ import {
 } from './pages.js'
 import { getLoginBody, getMarkdownBody, getPasswordChangeBody } from './request.js'
 import { createSession, deleteSession, getSession } from './sessions.js'
-import { deleteMarkdown, listMarkdownIds, readMarkdown, saveMarkdown } from './storage.js'
+import { deleteMarkdown, listMarkdownEntries, readMarkdown, saveMarkdown } from './storage.js'
 import {
   getUser,
   hasDefaultPassword,
@@ -280,23 +280,14 @@ export function createApp(mcpTransport: McpHttpTransport) {
       })
     }
 
-    const ids = await listMarkdownIds()
+    const entries = await listMarkdownEntries()
     if (!wantsHtml(c)) {
-      return c.json(
-        {
-          markdown: ids.map((id) => ({
-            id,
-            rawUrl: `/${id}/raw`,
-            htmlUrl: `/${id}`,
-          })),
-        },
-        200,
-      )
+      return c.json({ markdown: entries }, 200)
     }
 
     return c.html(
       renderMarkdownListPage({
-        ids,
+        entries,
         notice: c.req.query('notice'),
       }),
     )

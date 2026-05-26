@@ -33,10 +33,10 @@ export async function getMarkdownBody(c: Context) {
   const contentType = c.req.header('content-type') ?? ''
 
   if (contentType.includes('application/json')) {
-    let body: { markdown?: unknown }
+    let body: { markdown?: unknown; title?: unknown }
 
     try {
-      body = await c.req.json<{ markdown?: unknown }>()
+      body = await c.req.json<{ markdown?: unknown; title?: unknown }>()
     } catch {
       throw new HTTPException(400, { message: 'Invalid JSON body' })
     }
@@ -45,10 +45,14 @@ export async function getMarkdownBody(c: Context) {
       throw new HTTPException(400, { message: 'JSON must contain a "markdown" field' })
     }
 
-    return body.markdown
+    if (body.title !== undefined && typeof body.title !== 'string') {
+      throw new HTTPException(400, { message: 'JSON "title" field must be a string' })
+    }
+
+    return { markdown: body.markdown, title: body.title }
   }
 
-  return c.req.text()
+  return { markdown: await c.req.text() }
 }
 
 export async function getLoginBody(c: Context) {

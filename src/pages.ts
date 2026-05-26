@@ -1,4 +1,5 @@
 import MarkdownIt from 'markdown-it'
+import type { MarkdownEntry } from './storage.js'
 
 const md = new MarkdownIt({ html: false, linkify: true, typographer: true })
 
@@ -148,7 +149,7 @@ interface AccountPageOptions {
 }
 
 interface MarkdownListPageOptions {
-  ids: string[]
+  entries: MarkdownEntry[]
   notice?: string
 }
 
@@ -238,24 +239,24 @@ export function renderAccountPage({ username, passwordWarning, hasApiKey, apiKey
   )
 }
 
-export function renderMarkdownListPage({ ids, notice }: MarkdownListPageOptions) {
+export function renderMarkdownListPage({ entries, notice }: MarkdownListPageOptions) {
   const items =
-    ids.length === 0
+    entries.length === 0
       ? `<p class="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-sm text-slate-600">No markdown files have been stored yet.</p>`
       : `<div class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-200">
           <ul class="divide-y divide-slate-200">
-            ${ids
-              .map((id) => {
-                const escapedId = escapeHtml(id)
+            ${entries
+              .map((entry) => {
+                const escapedId = escapeHtml(entry.id)
                 return `<li class="flex flex-col gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p class="text-sm font-medium text-slate-900">Markdown</p>
+                    <p class="text-base font-semibold text-slate-900">${escapeHtml(entry.title)}</p>
                     <code class="mt-2 block break-all rounded bg-slate-100 px-3 py-2 text-sm text-slate-800">${escapedId}</code>
                   </div>
                   <div class="flex flex-wrap gap-3">
-                    <a class="rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="${escapeHtml(markdownHref(id))}">View</a>
-                    <a class="rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="${escapeHtml(rawMarkdownHref(id))}">Raw</a>
-                    <form method="post" action="${escapeHtml(deleteMarkdownHref(id))}" onsubmit="return confirm('Delete this markdown file?')">
+                    <a class="rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="${escapeHtml(markdownHref(entry.id))}">View</a>
+                    <a class="rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-100" href="${escapeHtml(rawMarkdownHref(entry.id))}">Raw</a>
+                    <form method="post" action="${escapeHtml(deleteMarkdownHref(entry.id))}" onsubmit="return confirm('Delete this markdown file?')">
                       <button class="rounded bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-500" type="submit">Delete</button>
                     </form>
                   </div>
@@ -273,7 +274,7 @@ export function renderMarkdownListPage({ ids, notice }: MarkdownListPageOptions)
           <a class="font-medium hover:text-slate-950" href="/">Markdown Share</a>
           <a class="hover:text-slate-950" href="/account">Account</a>
         </div>
-        <span>${ids.length} file${ids.length === 1 ? '' : 's'}</span>
+        <span>${entries.length} file${entries.length === 1 ? '' : 's'}</span>
       </nav>
       <section class="rounded-xl bg-white p-8 shadow-sm ring-1 ring-slate-200">
         <h1 class="text-2xl font-bold">Markdown overview</h1>
