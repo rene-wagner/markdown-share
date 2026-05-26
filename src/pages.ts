@@ -44,6 +44,23 @@ function renderLayout(title: string, content: string) {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${escapeHtml(title)}</title>
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <style>
+      .prose pre {
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      .prose table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .prose :not(pre) > code {
+        overflow-wrap: anywhere;
+      }
+    </style>
   </head>
   <body class="bg-slate-50 text-slate-950">
     <main class="mx-auto max-w-4xl px-6 py-10">
